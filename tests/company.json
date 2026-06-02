@@ -1,0 +1,24 @@
+{
+  "validatedAt": "2026-06-03T00:00:00.000Z",
+  "source": "ANAF",
+  "brand": "Lateral Group",
+  "anaf": {
+    "cui": 23067611,
+    "name": "LATERAL SRL",
+    "address": "JUDEȚUL MUREȘ, MUNICIPIUL TÂRGU MUREȘ, STRADA FRUNZEI 4A",
+    "registrationNumber": "J2008000046262",
+    "caenCode": "6201",
+    "vatRegistered": true,
+    "inactive": false
+  },
+  "peviitor": null,
+  "summary": {
+    "company": "LATERAL SRL",
+    "cif": "23067611",
+    "active": true,
+    "address": "JUDEȚUL MUREȘ, MUNICIPIUL TÂRGU MUREȘ, STRADA FRUNZEI 4A",
+    "registrationNumber": "J2008000046262",
+    "caenCode": "6201",
+    "vatRegistered": true
+  }
+}
