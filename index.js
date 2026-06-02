@@ -205,6 +205,23 @@ async function main() {
     writeFileSync('jobs.json', JSON.stringify(solrReadyJobs, null, 2));
     console.log(`[${COMPANY_BRAND} Scraper] Jobs saved to jobs.json`);
 
+    try {
+      const companyDoc = {
+        id: COMPANY_CIF,
+        company: COMPANY_NAME,
+        brand: COMPANY_BRAND,
+        status: 'activ',
+        website: ['https://lateralgroup.com'],
+        career: ['https://careers.lateralgroup.com'],
+        lastScraped: new Date().toISOString(),
+        scraperFile: 'https://github.com/cristian-alexutan/lateral-group-srl-nodejs-scraper/blob/main/index.js',
+      };
+      const companyResult = await solr.upsertCompany(companyDoc);
+      console.log(`[${COMPANY_BRAND} Scraper] Company upsert result:`, companyResult);
+    } catch (e) {
+      console.warn(`[${COMPANY_BRAND} Scraper] Company upsert failed (${e.message})`);
+    }
+
     console.log(`[${COMPANY_BRAND} Scraper] Done! ${solrReadyJobs.length} jobs processed.`);
   } catch (err) {
     console.error(`[${COMPANY_BRAND} Scraper] Error:`, err.message);

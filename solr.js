@@ -83,6 +83,22 @@ export async function deleteJobByUrl(url) {
   return response.json();
 }
 
+export async function upsertCompany(companyData) {
+  const url = `${SOLR_COMPANY_URL}/update?commit=true`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify([companyData]),
+    signal: AbortSignal.timeout(30000),
+  });
+
+  if (!response.ok) {
+    throw new Error(`SOLR company upsert error: ${response.status}`);
+  }
+
+  return response.json();
+}
+
 export async function upsertJobs(jobs) {
   const url = `${SOLR_URL}/update?commit=true`;
 
