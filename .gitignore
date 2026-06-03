@@ -10,3 +10,5 @@ delete.json
 *.pem
 *.key
 credentials.json
+test-report.html
+test-results-*.html
