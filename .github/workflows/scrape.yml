@@ -1,23 +1,45 @@
-name: Scrape Lateral Jobs
+name: WebScraper Lateral to Peviitor
 
 on:
   schedule:
-    - cron: '0 6 * * *'
+    - cron: '0 6 * * *'  # Daily at 6 AM
   workflow_dispatch:
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
         with:
-          node-version: 20
-      - run: npm ci
-      - run: npm run scrape
+          node-version: '24'
+          
+      - name: Install dependencies
+        run: npm install
+        
+      - name: Run scraper
+        run: npm run scrape
         env:
           SOLR_AUTH: ${{ secrets.SOLR_AUTH }}
-      - uses: actions/upload-artifact@v4
+          
+      - name: Check for new jobs
+        run: |
+          if [ -f jobs.json ]; then
+            echo "New jobs found:"
+            cat jobs.json | jq '.jobs | length'
+          else
+            echo "No new jobs or scrape failed"
+          fi
+          
+      - name: Upload jobs JSON
+        if: always()
+        uses: actions/upload-artifact@v7
         with:
-          name: jobs.json
-          path: jobs.json
+          name: scraped-jobs
+          path: |
+            jobs.json
+            jobs_existing.json
+          retention-days: 7

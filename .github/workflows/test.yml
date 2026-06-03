@@ -1,59 +1,142 @@
-name: Tests
+name: Automation Tests
 
 on:
+  schedule:
+    - cron: '0 7 * * *'
   push:
     branches: [main]
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
     inputs:
-      mode:
-        description: 'Dry run or delete'
+      dry_run:
+        description: 'Dry run mode (no deletions)'
         required: true
-        default: '--dry-run'
-        type: choice
-        options:
-          - '--dry-run'
-          - '--delete'
+        default: 'true'
 
 jobs:
   validate-jobs:
     runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
         with:
-          node-version: 20
-      - run: npm ci
-      - run: node tests/validate-lateral-jobs.js ${{ github.event.inputs.mode || '--dry-run' }}
+          node-version: '24'
+          
+      - name: Install dependencies
+        run: npm install
+        
+      - name: Validate and remove expired jobs
+        run: |
+          if [ "${{ github.event_name }}" == "schedule" ]; then
+            echo "Schedule trigger — running LIVE mode..."
+            node --no-deprecation tests/validate-lateral-jobs.js --delete
+          elif [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+            echo "Running in DRY RUN mode..."
+            node --no-deprecation tests/validate-lateral-jobs.js --dry-run
+          else
+            echo "Running in LIVE mode (will delete expired jobs)..."
+            node --no-deprecation tests/validate-lateral-jobs.js --delete
+          fi
         env:
           SOLR_AUTH: ${{ secrets.SOLR_AUTH }}
 
   ensure-company-core:
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-      - run: node company.js
+      - name: Ensure Lateral exists in company core
         env:
           SOLR_AUTH: ${{ secrets.SOLR_AUTH }}
+        run: |
+          EXISTING=$(curl -s --user "${SOLR_AUTH}" \
+            "https://solr.peviitor.ro/solr/company/select?q=id:23067611&rows=1" | jq '.response.numFound')
+          
+          echo "Lateral count in company core: $EXISTING"
+          
+          if [ "$EXISTING" -eq "0" ]; then
+            echo "Lateral not found - adding to company core..."
+            echo '[{"id":"23067611","company":"LATERAL SRL","brand":"Lateral Group","status":"activ","location":["Targu Mures"],"website":["https://www.lateralgroup.com"],"career":["https://careers.lateralgroup.com"],"lastScraped":"2026-06-03","scraperFile":"https://raw.githubusercontent.com/cristian-alexutan/lateral-group-srl-nodejs-scraper/main/.github/workflows/scrape.yml"}]' > company_data.json
+            
+            curl -s --user "${SOLR_AUTH}" \
+              "https://solr.peviitor.ro/solr/company/update/json?commit=true" \
+              -X POST \
+              -H "Content-Type: application/json" \
+              --data-binary @company_data.json
+          else
+            echo "Lateral already exists in company core - no action needed"
+          fi
+          
+          FINAL=$(curl -s --user "${SOLR_AUTH}" \
+            "https://solr.peviitor.ro/solr/company/select?q=id:23067611&rows=1" | jq '.response.numFound')
+          
+          echo "Lateral count after check: $FINAL"
+          
+          if [ "$FINAL" -ge "1" ]; then
+            echo "✅ SUCCESS: Lateral is in company core"
+          else
+            echo "❌ FAILED: Lateral still not in company core"
+            exit 1
+          fi
 
-  automation-tests:
+  Automation-Tests:
     runs-on: ubuntu-latest
+    needs: ensure-company-core
+    
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
         with:
-          node-version: 20
-      - run: npm ci
-      - run: npm run test:unit
-      - run: npm run test:integration
-      - run: npm run test:e2e
-      - uses: actions/upload-artifact@v4
-        if: always()
+          node-version: '24'
+          
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Unit Tests
+        run: |
+          npm run test:unit
+          mv test-report.html test-results-unit.html
+        env:
+          SOLR_AUTH: ${{ secrets.SOLR_AUTH }}
+          
+      - name: Upload Unit Test Results
+        uses: actions/upload-artifact@v7
         with:
-          name: test-report
-          path: test-report.html
+          name: unit-test-results
+          path: test-results-unit.html
+          retention-days: 30
+
+      - name: Run Integration Tests
+        run: |
+          npm run test:integration
+          mv test-report.html test-results-integration.html
+        env:
+          SOLR_AUTH: ${{ secrets.SOLR_AUTH }}
+          
+      - name: Upload Integration Test Results
+        uses: actions/upload-artifact@v7
+        with:
+          name: integration-test-results
+          path: test-results-integration.html
+          retention-days: 30
+
+      - name: Run E2E Tests
+        run: |
+          npm run test:e2e
+          mv test-report.html test-results-e2e.html
+        env:
+          SOLR_AUTH: ${{ secrets.SOLR_AUTH }}
+          
+      - name: Upload E2E Test Results
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-test-results
+          path: test-results-e2e.html
+          retention-days: 30
