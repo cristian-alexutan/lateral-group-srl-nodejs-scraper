@@ -6,9 +6,8 @@
  */
 
 import fetch from "node-fetch";
+import { deleteJobByUrl } from "../solr.js";
 
-const SOLR_URL = "https://solr.peviitor.ro/solr/job/update";
-const SOLR_AUTH = process.env.SOLR_AUTH || "solr:SolrRocks";
 const COMPANY_NAME = "LATERAL SRL";
 
 async function getJobs() {
@@ -44,27 +43,6 @@ async function checkUrl(url) {
   } catch (e) {
     return { status: 0, ok: false, error: e.message };
   }
-}
-
-async function deleteJobFromSolr(url) {
-  const params = new URLSearchParams({ commit: "true" });
-
-  const deleteQuery = JSON.stringify({
-    delete: { query: `url:"${url}"` }
-  });
-
-  const res = await fetch(`${SOLR_URL}?${params}`, {
-    method: "POST",
-    headers: {
-      Authorization: "Basic " + Buffer.from(SOLR_AUTH).toString("base64"),
-      "Content-Type": "application/json",
-      "User-Agent": "job_seeker_ro_spider"
-    },
-    body: deleteQuery
-  });
-
-  console.log(`Delete response status: ${res.status}`);
-  return res.ok;
 }
 
 async function main(args) {
@@ -132,7 +110,7 @@ async function main(args) {
 
       let deleted = 0;
       for (const job of expiredJobs) {
-        const ok = await deleteJobFromSolr(job.url);
+        const ok = await deleteJobByUrl(job.url);
         if (ok) {
           console.log(`🗑️ Deleted: ${job.job_title}`);
           deleted++;

@@ -18,7 +18,7 @@ NEVER use paths outside the project (e.g. `C:\Users\...\AppData\Local\Temp\openc
 - Push after commit
 
 ### 3. Environment Variables
-- `SOLR_AUTH=solr:SolrRocks` must be set in `.env.local` for SOLR tests
+- `SOLR_AUTH` must be set in `.env.local` for SOLR tests
 - `.env.local` is in `.gitignore` — never commit it
 
 ### 4. Testing
@@ -36,7 +36,7 @@ node --experimental-vm-modules node_modules/jest/bin/jest.js --testPathPattern=e
 ### 5. ESM + Jest
 - Use `jest.unstable_mockModule` (NOT `jest.mock`) for mocking ESM modules
 - Run with `--experimental-vm-modules` flag
-- SOLR tests use conditional `itIfSolr` helper — auto-skip when `SOLR_AUTH` not set
+- SOLR tests skip when `SOLR_AUTH` not set via `process.env.SOLR_AUTH` check
 
 ### 6. Module Structure
 - `src/anaf.js` — core ANAF library (imported by company.js)

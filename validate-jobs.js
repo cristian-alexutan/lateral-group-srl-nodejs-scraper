@@ -28,7 +28,7 @@ const EXPIRED_KEYWORDS = [
 async function checkJobUrl(url) {
   try {
     const res = await fetch(url, {
-      timeout: TIMEOUT,
+      signal: AbortSignal.timeout(TIMEOUT),
       headers: {
         "User-Agent": "job_seeker_ro_spider",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,application/json,*/*;q=0.8",

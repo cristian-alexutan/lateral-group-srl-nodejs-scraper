@@ -1,7 +1,6 @@
 import fetch from 'node-fetch';
 import * as company from './company.js';
 import * as solr from './solr.js';
-import * as anaf from './demoanaf.js';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { pathToFileURL } from 'url';
 
@@ -10,6 +9,8 @@ const COMPANY_CIF = '23067611';
 const COMPANY_NAME = 'LATERAL SRL';
 const CAREERS_RSS_URL = 'https://careers.lateralgroup.com/jobs.rss';
 const TIMEOUT = 10000;
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 2000;
 
 const ROMANIAN_CITIES = new Set([
   'Alba Iulia', 'Arad', 'Bacău', 'Baia Mare', 'Bistrița', 'Botoșani', 'Brașov', 'Brăila',
@@ -97,17 +98,32 @@ function extractTag(xml, tagName) {
 }
 
 async function fetchRSSFeed() {
-  const response = await fetch(CAREERS_RSS_URL, {
-    method: 'GET',
-    headers: { 'Accept': 'application/rss+xml, application/xml, text/xml' },
-    signal: AbortSignal.timeout(TIMEOUT),
-  });
+  let lastError;
 
-  if (!response.ok) {
-    throw new Error(`RSS feed error: ${response.status} ${response.statusText}`);
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const response = await fetch(CAREERS_RSS_URL, {
+        method: 'GET',
+        headers: { 'Accept': 'application/rss+xml, application/xml, text/xml' },
+        signal: AbortSignal.timeout(TIMEOUT),
+      });
+
+      if (!response.ok) {
+        lastError = new Error(`RSS feed error: ${response.status} ${response.statusText}`);
+        console.log(`RSS attempt ${attempt}/${MAX_RETRIES} failed: ${response.status}, retrying...`);
+        if (attempt < MAX_RETRIES) await sleep(RETRY_DELAY_MS);
+        continue;
+      }
+
+      return response.text();
+    } catch (err) {
+      lastError = err;
+      console.log(`RSS attempt ${attempt}/${MAX_RETRIES} error: ${err.message}, retrying...`);
+      if (attempt < MAX_RETRIES) await sleep(RETRY_DELAY_MS);
+    }
   }
 
-  return response.text();
+  throw lastError || new Error('RSS feed failed after retries');
 }
 
 async function scrapeAllListings() {
@@ -129,9 +145,8 @@ function mapToJobModel(rawJob, cif, companyName) {
     status: 'scraped',
   };
 
-  Object.keys(job).forEach(key => {
-    if (job[key] === undefined) delete job[key];
-  });
+  job.location = job.location || [];
+  job.tags = job.tags || [];
 
   return job;
 }

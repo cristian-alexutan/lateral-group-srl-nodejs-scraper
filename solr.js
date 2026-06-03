@@ -18,7 +18,7 @@ function getHeaders() {
 }
 
 export async function querySOLR(cif) {
-  const url = `${SOLR_URL}/select?q=cif:${cif}&rows=100&wt=json`;
+  const url = `${SOLR_URL}/select?q=cif:${escapeSolrValue(cif)}&rows=100&wt=json`;
   const response = await fetch(url, {
     method: 'GET',
     headers: getHeaders(),
@@ -49,7 +49,7 @@ export async function queryCompanySOLR(companyQuery) {
 
 export async function deleteJobsByCIF(cif) {
   const url = `${SOLR_URL}/update?commit=true`;
-  const body = { delete: { query: `cif:${cif}` } };
+  const body = { delete: { query: `cif:${escapeSolrValue(cif)}` } };
 
   const response = await fetch(url, {
     method: 'POST',
@@ -65,9 +65,13 @@ export async function deleteJobsByCIF(cif) {
   return response.json();
 }
 
+function escapeSolrValue(value) {
+  return String(value).replace(/"/g, '\\"').replace(/[+\-&|!(){}[\]^~*?:/]/g, '\\$&');
+}
+
 export async function deleteJobByUrl(url) {
   const solrUrl = `${SOLR_URL}/update?commit=true`;
-  const body = { delete: { query: `url:"${url}"` } };
+  const body = { delete: { query: `url:"${escapeSolrValue(url)}"` } };
 
   const response = await fetch(solrUrl, {
     method: 'POST',

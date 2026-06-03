@@ -29,7 +29,7 @@ jobs:
         run: |
           if [ -f jobs.json ]; then
             echo "New jobs found:"
-            cat jobs.json | jq '.jobs | length'
+            cat jobs.json | jq 'length'
           else
             echo "No new jobs or scrape failed"
           fi
@@ -39,7 +39,5 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: scraped-jobs
-          path: |
-            jobs.json
-            jobs_existing.json
+          path: jobs.json
           retention-days: 7

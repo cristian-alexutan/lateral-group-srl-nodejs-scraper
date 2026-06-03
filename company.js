@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
+import fetch from 'node-fetch';
 import { getCompanyFromANAFWithFallback } from './src/anaf.js';
 import * as solr from './solr.js';
 
@@ -81,7 +82,7 @@ export async function validateAndGetCompany() {
     const existingJobs = await solr.querySOLR(COMPANY_CIF);
     const existingJobsCount = existingJobs?.response?.numFound || 0;
 
-  const anafData = await getCompanyFromANAFWithFallback(COMPANY_CIF, null);
+    const anafData = await getCompanyFromANAFWithFallback(COMPANY_CIF, null);
     const isActive = anafData ? !anafData.inactive : true;
 
     let peviitorData = null;
