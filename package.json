@@ -21,5 +21,12 @@
   "devDependencies": {
     "jest": "^29.7.0",
     "jest-html-reporter": "^3.5.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": ["**/tests/**/*.test.js"],
+    "verbose": true,
+    "reporters": ["default", "jest-html-reporter"],
+    "testTimeout": 30000
   }
 }
