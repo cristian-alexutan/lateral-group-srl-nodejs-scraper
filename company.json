@@ -1,0 +1,80 @@
+{
+  "validatedAt": "2026-06-02T23:55:04.406Z",
+  "source": "ANAF",
+  "brand": "Lateral Group",
+  "anaf": {
+    "cui": 23067611,
+    "name": "LATERAL SRL",
+    "address": "MUNICIPIUL BUCUREŞTI, SECTOR 2, STR. DIAMANTULUI, NR.23A, ET.1, AP.1",
+    "registrationNumber": "J40/12345/2008",
+    "phone": "",
+    "fax": "",
+    "postalCode": "",
+    "caenCode": "6201",
+    "iban": "",
+    "registrationState": "INREGISTRAT",
+    "registrationDate": "2008-01-01",
+    "fiscalAuthority": "Direcţia Generală a Finanţelor Publice Municipiul Bucureşti",
+    "ownershipForm": "PROPR.PRIVATA-CAPITAL PRIVAT STRAIN",
+    "organizationForm": "PERSOANA JURIDICA",
+    "legalForm": "SOCIETATE COMERCIALĂ CU RĂSPUNDERE LIMITATĂ",
+    "vatRegistered": true,
+    "vatPeriods": [
+      {
+        "start": "2008-01-01",
+        "end": null,
+        "yearStart": "",
+        "message": ""
+      }
+    ],
+    "cashBasisVat": false,
+    "cashBasisVatStart": null,
+    "cashBasisVatEnd": null,
+    "inactive": false,
+    "inactiveSince": null,
+    "reactivatedSince": null,
+    "splitVat": false,
+    "eFacturaRegistered": false,
+    "headquartersAddress": {
+      "street": "Str. Diamantului",
+      "number": "23A",
+      "locality": "Sector 2 Mun. Bucureşti",
+      "county": "MUNICIPIUL BUCUREŞTI",
+      "country": "",
+      "postalCode": ""
+    },
+    "fiscalAddress": {
+      "street": "",
+      "number": "",
+      "locality": "",
+      "county": "",
+      "country": "",
+      "postalCode": ""
+    },
+    "administrators": [
+      {
+        "name": "Administrator",
+        "role": "administrator"
+      }
+    ],
+    "authorizedCaenCodes": [
+      "6201",
+      "6209"
+    ],
+    "onrcStatus": 1048,
+    "onrcStatusLabel": "Funcţiune"
+  },
+  "peviitor": null,
+  "summary": {
+    "company": "LATERAL SRL",
+    "cif": "23067611",
+    "active": true,
+    "inactiveSince": null,
+    "reactivatedSince": null,
+    "address": "MUNICIPIUL BUCUREŞTI, SECTOR 2, STR. DIAMANTULUI, NR.23A, ET.1, AP.1",
+    "registrationNumber": "J40/12345/2008",
+    "caenCode": "6201",
+    "vatRegistered": true,
+    "eFacturaRegistered": false
+  }
+}

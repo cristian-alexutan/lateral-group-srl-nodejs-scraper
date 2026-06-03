@@ -1,4 +1,4 @@
-import { searchCompany, getCompanyFromANAFWithFallback } from '../../demoanaf.js';
+import { searchCompany, getCompanyFromANAFWithFallback } from '../../src/anaf.js';
 
 describe('ANAF Module', () => {
   test('searchCompany returns array with cui and name', async () => {

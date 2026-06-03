@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
-import * as anaf from './demoanaf.js';
+import { getCompanyFromANAFWithFallback } from './src/anaf.js';
 import * as solr from './solr.js';
 
 const COMPANY_BRAND = 'Lateral Group';
@@ -65,7 +65,7 @@ export async function getCompanyData() {
     };
   }
 
-  const anafData = await anaf.getCompanyFromANAFWithFallback(COMPANY_CIF, null);
+  const anafData = await getCompanyFromANAFWithFallback(COMPANY_CIF, null);
   const active = anafData?.inactive === false;
 
   return {
@@ -81,7 +81,7 @@ export async function validateAndGetCompany() {
     const existingJobs = await solr.querySOLR(COMPANY_CIF);
     const existingJobsCount = existingJobs?.response?.numFound || 0;
 
-    const anafData = await anaf.getCompanyFromANAFWithFallback(COMPANY_CIF, null);
+  const anafData = await getCompanyFromANAFWithFallback(COMPANY_CIF, null);
     const isActive = anafData ? !anafData.inactive : true;
 
     let peviitorData = null;
