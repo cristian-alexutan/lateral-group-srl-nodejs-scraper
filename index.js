@@ -142,7 +142,7 @@ function mapToJobModel(rawJob, cif, companyName) {
     tags: rawJob.tags,
     workmode: rawJob.workmode,
     date: new Date().toISOString(),
-    status: 'scraped',
+    status: 'activ',
   };
 
   job.location = job.location || [];
